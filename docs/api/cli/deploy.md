@@ -47,11 +47,17 @@ Deploy an agent service.
     help="Number of agents.",
 )
 @click.option(
+    "--localhost",
+    "deployment_type",
+    flag_value=HostDeploymentGenerator.deployment_type,
+    help="Use localhost as a backend.",
+)
+@click.option(
     "--docker",
     "deployment_type",
     flag_value=DockerComposeGenerator.deployment_type,
     default=True,
-    help="Use docker as a backend.",
+    help="Use docker as a backend. (default)",
 )
 @click.option(
     "--kubernetes",
@@ -133,32 +139,39 @@ Deploy an agent service.
     help="Set agent memory usage limit.",
     default=DEFAULT_AGENT_MEMORY_LIMIT,
 )
+@click.option(
+    "--mkdir",
+    type=str,
+    help=
+    "Comma-separated list of directory names to create in the build directory.",
+    default=None,
+)
 @registry_flag()
 @password_option(confirmation_prompt=True)
 @image_author_option
 @click.pass_context
-def build_deployment_command(
-        click_context: click.Context,
-        keys_file: Optional[Path],
-        deployment_type: str,
-        output_dir: Optional[Path],
-        dev_mode: bool,
-        registry: str,
-        number_of_agents: Optional[int] = None,
-        password: Optional[str] = None,
-        open_aea_dir: Optional[Path] = None,
-        packages_dir: Optional[Path] = None,
-        log_level: str = INFO,
-        aev: bool = False,
-        image_version: Optional[str] = None,
-        use_hardhat: bool = False,
-        use_acn: bool = False,
-        use_tm_testnet_setup: bool = False,
-        image_author: Optional[str] = None,
-        agent_cpu_limit: Optional[float] = None,
-        agent_memory_limit: Optional[int] = None,
-        agent_cpu_request: Optional[float] = None,
-        agent_memory_request: Optional[int] = None) -> None
+def build_deployment_command(click_context: click.Context,
+                             keys_file: Optional[Path],
+                             deployment_type: str,
+                             output_dir: Optional[Path],
+                             dev_mode: bool,
+                             registry: str,
+                             number_of_agents: Optional[int] = None,
+                             password: Optional[str] = None,
+                             open_aea_dir: Optional[Path] = None,
+                             packages_dir: Optional[Path] = None,
+                             log_level: str = INFO,
+                             aev: bool = False,
+                             image_version: Optional[str] = None,
+                             use_hardhat: bool = False,
+                             use_acn: bool = False,
+                             use_tm_testnet_setup: bool = False,
+                             image_author: Optional[str] = None,
+                             agent_cpu_limit: Optional[float] = None,
+                             agent_memory_limit: Optional[int] = None,
+                             agent_cpu_request: Optional[float] = None,
+                             agent_memory_request: Optional[int] = None,
+                             mkdir: Optional[str] = None) -> None
 ```
 
 Build deployment setup for n agents.
@@ -192,10 +205,24 @@ Build deployment setup for n agents.
     default=False,
     help="Run service in the background.",
 )
+@click.option(
+    "--localhost",
+    "deployment_type",
+    flag_value="localhost",
+    help="Use localhost as a backend.",
+)
+@click.option(
+    "--docker",
+    "deployment_type",
+    flag_value="docker",
+    help="Use docker as a backend. (default)",
+    default=True,
+)
 def run(build_dir: Path,
         no_recreate: bool,
         remove_orphans: bool,
-        detach: bool = False) -> None
+        detach: bool = False,
+        deployment_type: str = "localhost") -> None
 ```
 
 Run deployment.
