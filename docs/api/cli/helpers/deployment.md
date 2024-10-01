@@ -59,7 +59,8 @@ def build_deployment(keys_file: Path,
                      use_acn: bool = False,
                      use_tm_testnet_setup: bool = False,
                      image_author: Optional[str] = None,
-                     resources: Optional[Resources] = None) -> None
+                     resources: Optional[Resources] = None,
+                     mkdir: Optional[List[str]] = None) -> None
 ```
 
 Build deployment.
