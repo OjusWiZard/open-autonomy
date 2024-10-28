@@ -29,7 +29,9 @@ from autonomy.chain.config import ChainType
 from autonomy.chain.constants import CHAIN_PROFILES
 
 
-ADDRESS_FILE_URL = "https://raw.githubusercontent.com/valory-xyz/autonolas-registries/main/docs/configuration.json"
+# this file is fetched from an old commit, because the latest file version has removed some chains
+# TODO: use the latest file
+ADDRESS_FILE_URL = "https://github.com/valory-xyz/autonolas-registries/raw/a6a35cf7bbdbac64eeab9375c0b32848b266a166/docs/configuration.json"
 
 
 class TestAddresses:
