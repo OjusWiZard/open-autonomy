@@ -91,24 +91,27 @@ def _run_aea_cmd(
             raise RuntimeError(f"Error running: {args} @ {cwd}\n{result_error}")
 
 
-def _prepare_agent_env(working_dir: Path) -> None:
+def _prepare_agent_env(working_dir: Path, offset: int) -> None:
     """Prepare agent env, add keys, run aea commands."""
     env = json.loads((working_dir / "agent.json").read_text(encoding="utf-8"))
 
     # TODO: Dynamic port allocation, backport to service builder
     env["CONNECTION_ABCI_CONFIG_HOST"] = "localhost"
-    env["CONNECTION_ABCI_CONFIG_PORT"] = "26658"
+    env["CONNECTION_ABCI_CONFIG_PORT"] = f"{26658 + 10 * offset}"
 
     for var in env:
         # Fix tendermint connection params
         if var.endswith("MODELS_PARAMS_ARGS_TENDERMINT_COM_URL"):
-            env[var] = "http://localhost:8080"
+            env[var] = f"http://localhost:{8080 + offset}"
 
         if var.endswith("MODELS_PARAMS_ARGS_TENDERMINT_URL"):
-            env[var] = "http://localhost:26657"
+            env[var] = f"http://localhost:{26657 + 10 * offset}"
 
         if var.endswith("MODELS_PARAMS_ARGS_TENDERMINT_P2P_URL"):
-            env[var] = "localhost:26656"
+            env[var] = f"localhost:{26656 + 10 * offset}"
+
+        if var.endswith("HTTP_SERVER_CONFIG_PORT"):
+            env[var] = f"{int(env[var]) + offset}"
 
         if var.endswith("MODELS_BENCHMARK_TOOL_ARGS_LOG_DIR"):
             benchmarks_dir = working_dir / BENCHMARKS_DIR
@@ -120,10 +123,40 @@ def _prepare_agent_env(working_dir: Path) -> None:
         encoding="utf-8",
     )
 
+    # configure tendermint
+    tm_config = (working_dir / "node" / "config" / "config.toml").read_text(
+        encoding="utf-8"
+    )
 
-def setup_agent(working_dir: Path, agent_config: Dict[str, Any]) -> None:
+    for old, new in [
+        (
+            ":26656",
+            f":{26656 + 10 * offset}",
+        ),
+        (
+            ":26657",
+            f":{26657 + 10 * offset}",
+        ),
+        (
+            ":26658",
+            f":{26658 + 10 * offset}",
+        ),
+        (
+            ":26660",
+            f":{26660 + offset}",
+        ),
+    ]:
+        tm_config = tm_config.replace(old, new)
+
+    (working_dir / "node" / "config" / "config.toml").write_text(
+        data=tm_config,
+        encoding="utf-8",
+    )
+
+
+def setup_agent(working_dir: Path, agent_config: Dict[str, Any], offset: int) -> None:
     """Setup locally deployed agent."""
-    _prepare_agent_env(working_dir)
+    _prepare_agent_env(working_dir, offset)
     shutil.copy(DEFAULT_AEA_CONFIG_FILE, working_dir)
 
     # add dependencies

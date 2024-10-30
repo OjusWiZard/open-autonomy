@@ -38,6 +38,7 @@ from autonomy.deploy.constants import (
     DEFAULT_ENCODING,
     TENDERMINT_VARS_CONFIG_FILE,
     TM_ENV_CREATE_EMPTY_BLOCKS,
+    TM_ENV_FLASK_RUN_PORT,
     TM_ENV_P2P_LADDR,
     TM_ENV_PROXY_APP,
     TM_ENV_RPC_LADDR,
@@ -79,11 +80,12 @@ class HostDeploymentGenerator(BaseDeploymentGenerator):
         params = {
             TM_ENV_TMHOME: tmhome,
             TM_ENV_TMSTATE: str(self.build_dir / TM_STATE_DIR),
-            TM_ENV_P2P_LADDR: "tcp://localhost:26656",
-            TM_ENV_RPC_LADDR: "tcp://localhost:26657",
-            TM_ENV_PROXY_APP: "tcp://localhost:26658",
+            TM_ENV_P2P_LADDR: f"tcp://localhost:{26656 + 10 * self.service_builder.service_offset}",
+            TM_ENV_RPC_LADDR: f"tcp://localhost:{26657 + 10 * self.service_builder.service_offset}",
+            TM_ENV_PROXY_APP: f"tcp://localhost:{26658 + 10 * self.service_builder.service_offset}",
             TM_ENV_CREATE_EMPTY_BLOCKS: "true",
             TM_ENV_USE_GRPC: "false",
+            TM_ENV_FLASK_RUN_PORT: str(8080 + self.service_builder.service_offset),
         }
         (self.build_dir / TENDERMINT_VARS_CONFIG_FILE).write_text(
             json.dumps(params, indent=2),
@@ -135,5 +137,5 @@ class HostDeploymentGenerator(BaseDeploymentGenerator):
         with open_file(DEFAULT_AEA_CONFIG_FILE, "r") as fp:
             aea_config = yaml_load_all(fp)
 
-        setup_agent(self.build_dir, aea_config[0])
+        setup_agent(self.build_dir, aea_config[0], self.service_builder.service_offset)
         return self

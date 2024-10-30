@@ -200,8 +200,6 @@ def _start_localhost_tendermint(working_dir: Path) -> subprocess.Popen:
             "run",
             "--host",
             "localhost",
-            "--port",
-            "8080",
         ],
         cwd=working_dir,
         stdout=subprocess.DEVNULL,
